@@ -9,6 +9,7 @@ import Image from 'next/image'
 const IntentLogo = () => {
   return (
     <Image
+      unoptimized
       src={'https://intent-assets.s3.ap-south-1.amazonaws.com/intent-banner.png'}
       alt={''}
       width={150}
