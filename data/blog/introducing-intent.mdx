@@ -1,0 +1,221 @@
+---
+title: 'Introducing Intent'
+date: '2024-08-31'
+lastmod: '2024-08-31'
+tags: ['intent', 'announcement']
+draft: false
+summary: 'Despite being so many freaking nodejs frameworks being available, here is my reasoning for why we needed a new refreshing framework.'
+images: ['/static/images/twitter-card.png']
+---
+
+## The Paradox of Choice in NodeJS
+
+The NodeJS ecosystem is rich with frameworks like NestJS, SailsJS, and Adonis. These frameworks offer extensive ecosystems of plugins and extensions, allowing developers to integrate databases, caches, and various services with ease. While this flexibility is powerful, it introduces a significant challenge: decision fatigue.
+
+> Simplicity is the ultimate sophistication
+
+This timeless quote resonates strongly in today's software engineering landscape. The current NodeJS ecosystem, fragmented with countless packages, often complicates development rather than simplifying it. Every developer has their preferences, leading to projects with varying architectures and dependencies.
+
+## The Need for Consistency
+During NodeJS, I found myself working on Node projects with vastly different architectures. Experimenting with various packages made it challenging for my team to understand and build upon our codebase. This inconsistency hampered our ability to:
+
+- Switch contexts quickly
+- Debug efficiently
+- Implement features rapidly
+
+## Learning from Other Ecosystems
+Frameworks like Laravel and Ruby on Rails have kept PHP and Ruby relevant by offering superior features and an excellent Developer Experience (DX). Inspired by this, and particularly affirmed by a [tweet](https://x.com/taylorotwell/status/1791468060903096422) from Taylor Otwell, I began to envision a similar solution for the NodeJS ecosystem.
+
+## The Birth of Intent
+I will be honest, first version of Intent is an aggregation of my past open source works that I have been doing since 2020. It's built on top of NestJS utilising it's
+powerful Dependency Injection system and HTTP Server Implementation. Intent prioritizes Developer Experience (DX), and various integrations like FileSystems, Queues, Cache, etc.
+
+<TOCInline toc={props.toc} exclude={["The Paradox of Choice in NodeJS", "The Need for Consistency", "Learning from Other Ecosystems", "The Birth of Intent"]} />
+
+## Introduction
+Intent is a web application framework built on top of NestJS. With built-in declarative and elegant APIs out-of-the-box, you can quickly build an production ready scalable application.
+
+Some of the features that Intent supports out of the box.
+
+|Integration|Drivers|
+|---|---|
+|RDBMS|MySQL, Postgres, Sqlite|
+|Storage|Unix File Systems, S3|
+|Message Queues|AWS SQS, Redis|
+|Mailers|SMTP, Mailgun, Resend|
+|Caching|Redis, In-Memory|
+|Console Commands||
+|Logging|File Based Logging|
+|Validations||
+|Transformers||
+|Helpers|Number, Array, Objects and Strings|
+|Internationalisation||
+
+Let's take a quick look at how quickly you can use these integrations.
+
+## Database Integration
+
+DB Introduction here.
+
+## Using Storage
+Intent supports `UNIX File System` and `AWS S3` right now. All you need to change is the configuration, and done. No change at the code level is needed.
+
+```ts
+// reads a file
+await Storage.disk("invoices").get("order_1234.pdf");
+
+// uploads a file
+await Storage.disk("invoices").put("order_23456.pdf", content, { 
+  mimeType: "application/pdf" 
+});
+```
+
+Read More - [Storage Docs](https://tryintent.com/docs/file-storage)
+
+## Message Queues
+For any async tasks, Intent provides support for Redis-based, AWS SQS message queues. Let's take a quick look.
+
+First, define a job with `Job` decorator.
+```ts
+import { Injectable } from '@nestjs/common';
+import { Job } from '@intentjs/core';
+
+@Injectable()
+export class NotificationJob {
+  constructor() {}
+
+  @Job('user_signedup')
+  async create(data: Record<string, any>) {
+    // write your logic here
+  }
+}
+```
+
+Now, we need to dispatch this job to the queue.
+
+```ts
+Dispatch({
+  job: "user_signedup",
+  data: { email: "vinayak@tryintent.com", subject: "Thanks for signing up.", },
+});
+```
+
+Now you can start consuming the messages using `node intent queue:work` command in terminal.
+
+Read More - [Queue Docs](https://tryintent.com/docs/queues)
+
+## Mailers
+Intent comes with an in-built email template which you can use to build emails. For example,
+
+```ts
+import { MailMessage } from '@intentjs/core';
+
+const mail = MailMessage.init()
+  .greeting('Hey there')
+  .line(
+    'We received your request to reset your account password.',
+  )
+  .button('Click here to reset your password', 'https://google.com')
+  .line('Alternative, you can also enter the code below when prompted')
+  .inlineCode('ABCD1234')
+  .line('Rise & Shine,')
+  .line('V')
+  .subject('Hey there from Intent')
+```
+
+Above code will output the following email,
+
+![Mail Sample](https://tryintent.com/docs/email-sample-1.png)
+
+Now you can simply send the email with any of the support drivers (Resend, Mailgun, SMTP).
+
+```ts
+import { Mail } from "@intentjs/core";
+
+Mail.init()
+  .to("vinayak@tryintent.com") // OR .to(['id1@email.com', 'id2@email.com'])
+  .send(mail);
+```
+
+Read More - [Mail Docs](https://tryintent.com/docs/mailers)
+
+## Caching
+Intent comes out of the support for `Redis` and `In Memory` cache database. Let's see how quickly you can start using cache.
+
+```ts
+// setting value in cache
+await Cache.store().set("otp", 1234);
+
+// getting value from cache
+await CacheStore().get("otp");
+```
+
+You might also run into situations where the data doesn't exist in the cache, then you can use the `remember` or `rememberForever` method.
+
+```ts
+const cb = () => {
+  // your custom logic here, for eg. a db query, an api call.
+  return [
+    { name: 'Shoe Dog', author: 'Phil Knight', },
+  ];
+};
+
+await CacheStore().remember("books", cb, 120);
+```
+
+Read More - [Cache Docs](https://tryintent.com/docs/cache)
+
+## Console Commands
+You can also write elegant console commands using Intent which you can run in your terminal using `node intent command_name`.
+
+```ts
+import { Injectable } from "@nestjs/common";
+import { Command, ConsoleIO } from "@intentjs/core";
+
+@Injectable()
+@Command("hello {name=world}", { desc: "Test Command" })
+export class HelloWorldCommand {
+  async handle(_cli: ConsoleIO): Promise<void> {
+    const name = _cli.argument<string>("name");
+    _cli.info(`Hello ${name}!`);
+    return;
+  }
+}
+```
+
+Now you can run the command in your terminal
+
+```bash
+node intent hello vinayak
+```
+
+Read More - [Console Docs](https://tryintent.com/docs/console)
+
+## Logging
+Intent comes with support for file based logging, You can make use of the file based logging. Let's take a quick look,
+
+```ts
+import { Log } from '@intentjs/core';
+
+const logger = Log();
+
+logger.debug('hello world!');
+logger.verbose('verbose');
+logger.info('info');
+logger.warn('warn');
+logger.error('error', e);
+```
+
+Read More - [Logging Docs](https://tryintent.com/docs/logging)
+
+## Support
+
+Using the template? Support this effort by giving a star on GitHub, sharing your own blog and giving a shoutout on Twitter or be a project [sponsor](https://github.com/sponsors/timlrx).
+
+## Licence
+
+[MIT](https://github.com/timlrx/tailwind-nextjs-starter-blog/blob/main/LICENSE) © [Timothy Lin](https://www.timrlx.com)
+
+{/* [^1]: The previous version injects Preact into the production build. However, this is no longer possible as it does not support React Server Components. While overall bundle size has increased to about 85kB, most of the content can be pre-rendered on the server side, resulting in a low first contentful paint and time to interactive. Using React throughtout also leads to more consistent behavior with external libraries and components.
+[^2]: This is different from Next.js App Directory layouts and are best thought of as reusable React containers.
+[^3]: This takes advantage of Server Components by making it simple to specify the layout of choice in the markdown file and match against the `layouts` object which is then used to render the appropriate layout component. */}
