@@ -77,6 +77,10 @@ module.exports = () => {
           protocol: 'https',
           hostname: 'picsum.photos',
         },
+        {
+          protocol: 'https',
+          hostname: 'intent-assets.s3.ap-south-1.amazonaws.com',
+        },
       ],
       unoptimized,
     },

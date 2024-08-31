@@ -46,6 +46,7 @@ Some of the features that Intent supports out of the box.
 |Caching|Redis, In-Memory|
 |Console Commands||
 |Logging|File Based Logging|
+|Exception Handler|Sentry Integration|
 |Validations||
 |Transformers||
 |Helpers|Number, Array, Objects and Strings|
@@ -208,14 +209,136 @@ logger.error('error', e);
 
 Read More - [Logging Docs](https://tryintent.com/docs/logging)
 
+## Exception Handler
+Intent comes with global exception filter for your application, along with integration for Sentry enabling you to track and notify you of errors whenever they happen on production.
+
+```ts
+import { AppConfig } from '@libs/intent';
+import { registerAs } from '@nestjs/config';
+
+export default registerAs(
+  'app',
+  () =>
+    ({
+      // other config here.
+
+      sentry: {
+        dsn: process.env.SENTRY_DSN,
+        tracesSampleRate: 1.0,
+        profilesSampleRate: 1.0,
+        integrateNodeProfile: true,
+      },
+    }) as AppConfig,
+);
+```
+
+Read More - [Error Handling](https://tryintent.com/docs/error-handling)
+
+## Transformers
+Intent comes with support for `Transformers` which you can use to transform the response objects before you send it out to the client,
+the clients can also request for additional data on the fly.
+
+You can read more about it [here](https://tryintent.com/docs/transformers).
+
+## Helpers
+I have added multiple helper methods which I feel would be very useful, so that you don't have to pollute your code with small logic.
+
+For example, let's take a look at `Numbers` helper
+
+```ts
+import { Num } from "@intentjs/core";
+Num.abbreviate(1200, { precision: 2 });
+// 1.2K
+
+Num.abbreviate(1200, { locale: "hi" });
+// 1.2 हज़ार
+```
+
+It also has `String` helpers, for example.
+
+```ts
+import { Str } from '@intentjs/core';
+
+Str.pluralize('child');
+// children
+
+Str.remove("New OSS NodeJS Framework", "OSS ");
+// New NodeJS Framework
+```
+
+If you want to pull some keys from nested `objects`, you can do so
+
+```ts
+import { Obj } from '@intentjs/core';
+
+const obj = {
+  firstName: "Vinayak",
+  lastName: "Sarawagi",
+  email: "vinayak@tryintent.com",
+  wishlist: [
+    { id: 1, name: "Product 1" },
+    { id: 2, name: "Product 2" },
+  ],
+};
+
+Obj.pick(obj, ["firstName", "lastName", "wishlist.*.id"]);
+/**
+ *  {
+ *    firstName: 'Vinayak',
+ *    lastName: 'Sarawagi',
+ *    wishlist: [ { id: 1 }, { id: 2 } ]
+ *  }
+ */
+```
+
+Similarly, you can also use `Array` helpers, let's say you want to return the array but without some keys.
+
+```ts
+import { Arr } from '@intentjs/core';
+
+const goats = [
+  { name: 'Saina Nehwal', sport: 'Badminton' },
+  { name: 'Sunil Chetri', sport: 'Football' },
+  { name: 'Rohit Sharma', sport: 'Cricket' },
+  { name: 'Virat Kohli', sport: 'Cricket' },
+];
+
+Arr.except(goats, ['*.sport']);
+/**
+  [
+    { name: 'Saina Nehwal' },
+    { name: 'Sunil Chetri' },
+    { name: 'Rohit Sharma' },
+    { name: 'Virat Kohli' }
+  ]
+*/
+```
+
+Read more - [Helpers Doc](https://tryintent.com/)
+
+## Internationalisation
+
+If you would like integrate localisation in your application, you can easily do so by just defining your `lang_code.json` file inside `resources/lang` directory.
+
+Now you can request for translated strings using `__` helper.
+
+```ts
+import { __ } from "@intentjs/core";
+
+__("quote");
+// If your dreams do not scare you, they are already becoming a reality.
+
+__("quote", "hi");
+// अगर आपके सपने आपको नहीं डरा रहे हैं, तो वो पहले से पुरे होने लग चुके हैं।
+```
+
+Localisation also supports parameterisation, pluralisation out of the box, you can read more about it [here](https://tryintent.com/docs/localization).
+
 ## Support
 
-Using the template? Support this effort by giving a star on GitHub, sharing your own blog and giving a shoutout on Twitter or be a project [sponsor](https://github.com/sponsors/timlrx).
+Though I am currently using Intent in multiple products, it's still the first release, so honestly there will be a few hidden bugs.
+If you run into any similar issues, you can either raise an issue [here](https://github.com/intentjs/core/issues/new?assignees=&labels=&projects=&template=bug_report.md&title=), or drop me an email at `hi@tryintent.com` for any support.
 
 ## Licence
 
-[MIT](https://github.com/timlrx/tailwind-nextjs-starter-blog/blob/main/LICENSE) © [Timothy Lin](https://www.timrlx.com)
-
-{/* [^1]: The previous version injects Preact into the production build. However, this is no longer possible as it does not support React Server Components. While overall bundle size has increased to about 85kB, most of the content can be pre-rendered on the server side, resulting in a low first contentful paint and time to interactive. Using React throughtout also leads to more consistent behavior with external libraries and components.
-[^2]: This is different from Next.js App Directory layouts and are best thought of as reusable React containers.
-[^3]: This takes advantage of Server Components by making it simple to specify the layout of choice in the markdown file and match against the `layouts` object which is then used to render the appropriate layout component. */}
+Intent is licensed under [MIT](https://github.com/intentjs/core/blob/main/LICENSE.md) © [HanaLabs](https://tryhanalabs.com)

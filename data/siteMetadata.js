@@ -3,7 +3,7 @@ const siteMetadata = {
   title: 'Intent Blog',
   author: 'Vinayak Sarawagi',
   headerTitle: 'Intent Blog',
-  description: 'A blog created with Next.js and Tailwind.css',
+  description: 'Official Blog for IntentJS',
   language: 'en-us',
   theme: 'system', // system, dark or light
   siteUrl: 'https://blog.tryintent.com',
