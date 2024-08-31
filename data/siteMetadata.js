@@ -8,8 +8,8 @@ const siteMetadata = {
   theme: 'system', // system, dark or light
   siteUrl: 'https://blog.tryintent.com',
   siteRepo: 'https://github.com/intentjs/blog',
-  siteLogo: `${process.env.BASE_PATH || ''}/static/images/logo.png`,
-  socialBanner: `${process.env.BASE_PATH || ''}/static/images/twitter-card.png`,
+  siteLogo: `https://intent-assets.s3.ap-south-1.amazonaws.com/intent-logo.png`,
+  socialBanner: `https://intent-assets.s3.ap-south-1.amazonaws.com/intent-banner.png`,
   // mastodon: 'https://mastodon.social/@mastodonuser',
   email: 'hi@tryintent.com',
   github: 'https://github.com/intentjs',
